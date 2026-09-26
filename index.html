@@ -56,7 +56,6 @@
   </style>
 </head>
 <body class="bg-black text-white min-h-[100dvh] flex flex-col justify-between md:justify-start items-center p-2 sm:p-4 md:p-6 no-select">
-
   <!-- ヘッダーエリア（タイトルの中心とカラーバーの中心を一致、右側に操作ボタン） -->
   <header class="flex flex-row items-center gap-2 sm:gap-4 md:gap-6 w-full max-w-5xl mx-auto mb-2 md:mb-4 py-1">
     
@@ -266,12 +265,38 @@
     }
 
     // 音声合成エンジン（Web Speech API）の初回遅延防止用ウォームアップ
+    let cachedVoice = null;
+    let hasPreparedSpeech = false; // ウォームアップを1回だけに制限するフラグ
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        const voices = window.speechSynthesis.getVoices();
+        cachedVoice = voices.find(v => v.lang.includes('ja') && v.localService) || voices.find(v => v.lang.includes('ja'));
+      };
+    }
+
     function prepareSpeech() {
+      if (hasPreparedSpeech) return; // 既に実行済みの場合は処理を抜ける（毎回の再生を防ぐ）
+
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
+        const voices = window.speechSynthesis.getVoices();
+        if (!cachedVoice) cachedVoice = voices.find(v => v.lang.includes('ja') && v.localService) || voices.find(v => v.lang.includes('ja'));
+        
+        // 「。」を完全に削除し、空文字を指定
         const uttr = new SpeechSynthesisUtterance('');
         uttr.volume = 0;
-        window.speechSynthesis.speak(uttr);
+        
+        // 空文字によるエラー（または警告）を握りつぶすエラーハンドリング
+        uttr.onerror = function(e) {
+          // 意図的な空発話なのでエラーを無視する
+        };
+
+        try {
+          window.speechSynthesis.speak(uttr);
+          hasPreparedSpeech = true; // 初回成功時にフラグを立てる
+        } catch(e) {
+          console.warn("Speech API warmup skipped:", e);
+        }
       }
     }
 
@@ -319,13 +344,16 @@
       if (isMuted) return;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-        const text = isHiragana ? 'はじめ！' : 'スタート！';
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'ja-JP';
-        uttr.rate = 1.2;
-        uttr.pitch = 1.25;
-        window.speechSynthesis.speak(uttr);
+        // cancel直後のspeakは一部ブラウザで無視されるため、ごくわずかに遅延させる
+        setTimeout(() => {
+          const text = isHiragana ? 'はじめ！' : 'スタート！';
+          const uttr = new SpeechSynthesisUtterance(text);
+          uttr.lang = 'ja-JP';
+          if (cachedVoice) uttr.voice = cachedVoice;
+          uttr.rate = 1.2;
+          uttr.pitch = 1.25;
+          window.speechSynthesis.speak(uttr);
+        }, 50);
       }
     }
 
@@ -333,13 +361,15 @@
       if (isMuted) return;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-        const text = isHiragana ? 'のこり、はんぶん' : '残り、半分';
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'ja-JP';
-        uttr.rate = 1.0;
-        uttr.pitch = 1.1;
-        window.speechSynthesis.speak(uttr);
+        setTimeout(() => {
+          const text = isHiragana ? 'のこり、はんぶん' : '残り、半分';
+          const uttr = new SpeechSynthesisUtterance(text);
+          uttr.lang = 'ja-JP';
+          if (cachedVoice) uttr.voice = cachedVoice;
+          uttr.rate = 1.0;
+          uttr.pitch = 1.1;
+          window.speechSynthesis.speak(uttr);
+        }, 50);
       }
     }
 
@@ -347,13 +377,15 @@
       if (isMuted) return;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-        const text = isHiragana ? 'のこり、５ふん' : '残り、5分';
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'ja-JP';
-        uttr.rate = 1.0;
-        uttr.pitch = 1.1;
-        window.speechSynthesis.speak(uttr);
+        setTimeout(() => {
+          const text = isHiragana ? 'のこり、５ふん' : '残り、5分';
+          const uttr = new SpeechSynthesisUtterance(text);
+          uttr.lang = 'ja-JP';
+          if (cachedVoice) uttr.voice = cachedVoice;
+          uttr.rate = 1.0;
+          uttr.pitch = 1.1;
+          window.speechSynthesis.speak(uttr);
+        }, 50);
       }
     }
 
@@ -361,13 +393,15 @@
       if (isMuted) return;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-        const text = isHiragana ? 'のこり、いっぷん' : '残り、1分';
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'ja-JP';
-        uttr.rate = 1.0;
-        uttr.pitch = 1.1;
-        window.speechSynthesis.speak(uttr);
+        setTimeout(() => {
+          const text = isHiragana ? 'のこり、いっぷん' : '残り、1分';
+          const uttr = new SpeechSynthesisUtterance(text);
+          uttr.lang = 'ja-JP';
+          if (cachedVoice) uttr.voice = cachedVoice;
+          uttr.rate = 1.0;
+          uttr.pitch = 1.1;
+          window.speechSynthesis.speak(uttr);
+        }, 50);
       }
     }
 
@@ -375,13 +409,16 @@
       if (isMuted) return;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-        const text = isHiragana ? 'おわりです。おつかれさまでした。' : '終わりです。お疲れ様でした。';
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'ja-JP';
-        uttr.rate = 1.0;
-        uttr.pitch = 1.1;
-        window.speechSynthesis.speak(uttr);
+        setTimeout(() => {
+          // 終了時のメッセージを変更
+          const text = isHiragana ? 'おわり' : '終わり';
+          const uttr = new SpeechSynthesisUtterance(text);
+          uttr.lang = 'ja-JP';
+          if (cachedVoice) uttr.voice = cachedVoice;
+          uttr.rate = 1.0;
+          uttr.pitch = 1.1;
+          window.speechSynthesis.speak(uttr);
+        }, 50);
       }
     }
 
