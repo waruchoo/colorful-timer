@@ -56,6 +56,7 @@
   </style>
 </head>
 <body class="bg-black text-white min-h-[100dvh] flex flex-col justify-between md:justify-start items-center p-2 sm:p-4 md:p-6 no-select">
+
   <!-- ヘッダーエリア（タイトルの中心とカラーバーの中心を一致、右側に操作ボタン） -->
   <header class="flex flex-row items-center gap-2 sm:gap-4 md:gap-6 w-full max-w-5xl mx-auto mb-2 md:mb-4 py-1">
     
@@ -780,7 +781,7 @@
         isRunning = false;
         releaseWakeLock();
         btnStart.textContent = DICT[langKey].start;
-        btnStart.className = 'w-4/12 md:w-[35%] bg-green-600 hover:bg-green-500 active:scale-95 text-white font-black py-2.5 sm:py-3 md:py-4 text-base sm:text-xl md:text-2xl border-2 sm:border-4 border-green-400 rounded-full transition-transform';
+        btnStart.className = 'w-4/12 md:w-[35%] bg-green-600 hover:bg-green-500 active:bg-green-700 active:scale-95 text-white font-black py-2.5 sm:py-3 md:py-4 text-base sm:text-xl md:text-2xl border-2 sm:border-4 border-green-400 rounded-full shadow-lg transition-transform';
       } else {
         // スタート
         isRunning = true;
